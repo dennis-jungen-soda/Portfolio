@@ -1,15 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Set current year in footer
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Typing Effect
+    // Typing effect
     const typedTextSpan = document.querySelector(".typed-text");
     const cursorSpan = document.querySelector(".cursor");
-
     const textArray = ["Interim Finance Solutions", "Business & Financial Control", "Finance Manager"];
-    const typingDelay = 100;
-    const erasingDelay = 50;
-    const newTextDelay = 2000;
+    const typingDelay = 80;
+    const erasingDelay = 40;
+    const newTextDelay = 2200;
     let textArrayIndex = 0;
     let charIndex = 0;
 
@@ -19,8 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
             typedTextSpan.textContent += textArray[textArrayIndex].charAt(charIndex);
             charIndex++;
             setTimeout(type, typingDelay);
-        }
-        else {
+        } else {
             cursorSpan.classList.remove("typing");
             setTimeout(erase, newTextDelay);
         }
@@ -32,53 +29,76 @@ document.addEventListener('DOMContentLoaded', () => {
             typedTextSpan.textContent = textArray[textArrayIndex].substring(0, charIndex - 1);
             charIndex--;
             setTimeout(erase, erasingDelay);
-        }
-        else {
+        } else {
             cursorSpan.classList.remove("typing");
             textArrayIndex++;
             if (textArrayIndex >= textArray.length) textArrayIndex = 0;
-            setTimeout(type, typingDelay + 1100);
+            setTimeout(type, typingDelay + 800);
         }
     }
 
     if (textArray.length) setTimeout(type, newTextDelay + 250);
 
-    // Scroll Reveal Animation (Intersection Observer)
-    const observerOptions = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.15
-    };
-
-    const observer = new IntersectionObserver((entries, observer) => {
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries, obs) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+                obs.unobserve(entry.target);
             }
         });
-    }, observerOptions);
+    }, { threshold: 0.12 });
 
-    const elementsToAnimate = document.querySelectorAll('.fade-in');
-    elementsToAnimate.forEach(el => observer.observe(el));
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // Theme Toggle
+    // Theme toggle
     const themeToggleBtn = document.getElementById('theme-toggle');
-    const currentTheme = localStorage.getItem('theme');
+    const savedTheme = localStorage.getItem('theme');
 
-    // Check local storage for theme preference
-    if (currentTheme) {
-        document.documentElement.setAttribute('data-theme', currentTheme);
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
     }
 
     themeToggleBtn.addEventListener('click', () => {
-        let theme = document.documentElement.getAttribute('data-theme');
-        if (theme === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'light');
-            localStorage.setItem('theme', 'light');
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+    });
+
+    // Mobile navigation
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+    const overlay = document.getElementById('mobile-overlay');
+
+    function closeMenu() {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('open');
+        overlay.classList.remove('active');
+    }
+
+    hamburger.addEventListener('click', () => {
+        const isOpen = navLinks.classList.contains('open');
+        if (isOpen) {
+            closeMenu();
         } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
+            hamburger.classList.add('active');
+            navLinks.classList.add('open');
+            overlay.classList.add('active');
         }
     });
+
+    overlay.addEventListener('click', closeMenu);
+
+    navLinks.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', closeMenu);
+    });
+
+    // Shrink navbar on scroll
+    const navbar = document.querySelector('.navbar');
+    window.addEventListener('scroll', () => {
+        navbar.style.padding = window.scrollY > 60 ? '0.8rem 5%' : '1.2rem 5%';
+    }, { passive: true });
 });
